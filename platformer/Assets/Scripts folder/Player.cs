@@ -1,6 +1,9 @@
+using System;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SocialPlatforms;
 
 public class Player : MonoBehaviour
 {
@@ -10,8 +13,16 @@ public class Player : MonoBehaviour
     [SerializeField] private float runAcceleration = 30f;
 
     [SerializeField] private float runDeceleration = 40f;
-
+    [Header("Jump Settings")]
     [SerializeField] private float jumpSpeed = 5.0f;
+    [SerializeField][Range(0.1f, 1f)] private float  jumpCutMultiplyer = 0.5f;
+    [SerializeField] private float coyoteTime = 0.1f;
+    [SerializeField] private float jumpBufferTime = 0.1f;
+    [SerializeField] private float fallGravityMulti = 2.0f;
+    float lastGroundTime;
+    float jumpBufferTimer;
+    float gravityScaleAtStart;
+   
 
     [SerializeField] private InputActionAsset inputActions;
 
@@ -29,7 +40,7 @@ public class Player : MonoBehaviour
 
     public LayerMask GroundLayer => groundlayer.value != 0 ? groundlayer : LayerMask.GetMask("ground");
 
-    BoxCollider2D playerfeetcolider;
+    BoxCollider2D playerFeetColider;
 
     // Initializes its contents before the game begins
     void Awake()
@@ -38,7 +49,9 @@ public class Player : MonoBehaviour
 
         playerAnimator = GetComponentInChildren<Animator>();
 
-        playerfeetcolider = GetComponent<BoxCollider2D>();
+        playerFeetColider = GetComponent<BoxCollider2D>();
+
+        gravityScaleAtStart = playerCharacter.gravityScale;
 
         InputActionMap playerMap = inputActions.FindActionMap("Player", true);
 
@@ -67,7 +80,10 @@ public class Player : MonoBehaviour
 
         Run();
 
-        jump();
+        Jump();
+
+        BetterGravity();
+
     }
 
     private void Run()
@@ -110,15 +126,64 @@ public class Player : MonoBehaviour
 
     }
 
-    private void jump()
+    private void Jump()
     {
-        bool isgrounded = playerfeetcolider.IsTouchingLayers(GroundLayer);
-
-        if(JumpPressedThisFrame&&isgrounded)
+        
+        if(jumpAction.WasReleasedThisFrame()&& playerCharacter.linearVelocity.y >0)
         {
-            playerCharacter.linearVelocity = new Vector2(playerCharacter.linearVelocity.x, jumpSpeed);
+            playerCharacter.linearVelocity = new Vector2(playerCharacter.linearVelocity.x, playerCharacter.linearVelocity.y * jumpCutMultiplyer);
+        }
+
+
+        bool isgrounded = playerFeetColider.IsTouchingLayers(GroundLayer);
+
+
+
+        if (isgrounded)
+        {
+            //Remember a breafe window after leaving the ground
+            lastGroundTime = coyoteTime;
+        }
+        else
+        {
+            lastGroundTime -= Time.deltaTime;
+        }
+
+        if (JumpPressedThisFrame)
+        {
+            //Remember a jump press for landing
+            jumpBufferTimer = jumpBufferTime;
+
+        }
+        else
+        {
+            jumpBufferTimer -= Time.deltaTime;
+        }
+        if (lastGroundTime <= 0 || jumpBufferTimer <= 0)
+        {
+            return;
+        }
+        playerCharacter.linearVelocity = new Vector2(playerCharacter.linearVelocity.x, jumpSpeed);
+        lastGroundTime = 0;
+        jumpBufferTimer = 0;
+    }
+    private void BetterGravity()
+    {
+        //use stronger gravity when falling then cap fall speed. 
+        float gravityMultiplyer = playerCharacter.linearVelocity.y < 0 ? fallGravityMulti : 1f;
+
+        playerCharacter.gravityScale = gravityScaleAtStart * gravityMultiplyer;
+
+        if(playerCharacter.linearVelocity.y < -jumpSpeed * fallGravityMulti)
+        {
+            playerCharacter.linearVelocity = new Vector2(playerCharacter.linearVelocity.x,-jumpSpeed*fallGravityMulti);
         }
     }
+
+
+
+
+
 
 
 }
