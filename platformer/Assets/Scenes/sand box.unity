@@ -2139,7 +2139,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 2
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -2149,7 +2149,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!70 &322542301
 CapsuleCollider2D:
@@ -2219,7 +2219,11 @@ MonoBehaviour:
   runSpeed: 5
   runAcceleration: 30
   runDeceleration: 40
-  jumpSpeed: 5
+  jumpSpeed: 10
+  jumpCutMultiplyer: 0.5
+  coyoteTime: 0.1
+  jumpBufferingTime: 0.1
+  fallGravityMulti: 0.5
   inputActions: {fileID: -944628639613478452, guid: febc5f25f6838804196db5fe7fa7a899, type: 3}
   groundlayer:
     serializedVersion: 2
@@ -2254,7 +2258,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
