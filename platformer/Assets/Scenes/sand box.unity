@@ -2222,12 +2222,12 @@ MonoBehaviour:
   jumpSpeed: 10
   jumpCutMultiplyer: 0.5
   coyoteTime: 0.1
-  jumpBufferingTime: 0.1
-  fallGravityMulti: 0.5
+  jumpBufferTime: 0.1
+  fallGravityMulti: 2
   inputActions: {fileID: -944628639613478452, guid: febc5f25f6838804196db5fe7fa7a899, type: 3}
   groundlayer:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 0
 --- !u!61 &322542304
 BoxCollider2D:
   m_ObjectHideFlags: 0
