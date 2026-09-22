@@ -19,6 +19,13 @@ public class Player : MonoBehaviour
     [SerializeField] private float coyoteTime = 0.1f;
     [SerializeField] private float jumpBufferTime = 0.1f;
     [SerializeField] private float fallGravityMulti = 2.0f;
+
+    [SerializeField] private float climbSpeed = 5.0f;
+
+    [SerializeField] private float ladderJumpTime = 0.1f;
+    float jumpedOffLadderTimer;
+    
+
     float lastGroundTime;
     float jumpBufferTimer;
     float gravityScaleAtStart;
@@ -27,6 +34,8 @@ public class Player : MonoBehaviour
     [SerializeField] private InputActionAsset inputActions;
 
     [SerializeField] private LayerMask groundlayer;
+
+    LayerMask climbingLayer;
 
     InputAction moveAction;
     InputAction jumpAction;
@@ -42,9 +51,13 @@ public class Player : MonoBehaviour
 
     BoxCollider2D playerFeetColider;
 
+    CapsuleCollider2D playerBodyCollider;
+
     // Initializes its contents before the game begins
     void Awake()
     {
+        playerBodyCollider = GetComponent<CapsuleCollider2D>();
+
         playerCharacter = GetComponent<Rigidbody2D>();
 
         playerAnimator = GetComponentInChildren<Animator>();
@@ -59,6 +72,7 @@ public class Player : MonoBehaviour
 
         moveAction = playerMap.FindAction("Move", true);
 
+        climbingLayer = LayerMask.GetMask("Climbing");
 
 
         playerMap.Enable();
@@ -83,6 +97,8 @@ public class Player : MonoBehaviour
         Jump();
 
         BetterGravity();
+
+        climb();
 
     }
 
@@ -135,7 +151,7 @@ public class Player : MonoBehaviour
         }
 
 
-        bool isgrounded = playerFeetColider.IsTouchingLayers(GroundLayer);
+        bool isgrounded = playerFeetColider.IsTouchingLayers(GroundLayer) || playerBodyCollider.IsTouchingLayers(climbingLayer);
 
 
 
@@ -174,10 +190,44 @@ public class Player : MonoBehaviour
 
         playerCharacter.gravityScale = gravityScaleAtStart * gravityMultiplyer;
 
+       
+
         if(playerCharacter.linearVelocity.y < -jumpSpeed * fallGravityMulti)
         {
             playerCharacter.linearVelocity = new Vector2(playerCharacter.linearVelocity.x,-jumpSpeed*fallGravityMulti);
         }
+    }
+
+
+
+    private void climb()
+    {
+        jumpedOffLadderTimer -= Time.deltaTime;
+
+        if (jumpedOffLadderTimer > 0 || !playerBodyCollider.IsTouchingLayers(climbingLayer))
+        {
+            playerAnimator.SetBool("Climb", false);
+            playerCharacter.gravityScale = gravityScaleAtStart;
+
+            return;
+        }
+       float vMovement = MoveInput.y;
+        Vector2 climbingVelocity = new Vector2(MoveInput.x*runSpeed,vMovement = climbSpeed);
+
+        playerCharacter.linearVelocity = climbingVelocity;
+
+
+
+        bool vSpeed = Mathf.Abs(playerCharacter.linearVelocity.y) > Mathf.Epsilon;
+            playerAnimator.SetBool("Climb", false);
+        
+
+
+
+        playerCharacter.gravityScale = 0.0f;
+
+       
+
     }
 
 
