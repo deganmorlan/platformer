@@ -15,7 +15,7 @@ TagManager:
   - Player
   - BackGround
   - Climbing
-  - 
+  - enamy
   - 
   - 
   - 
@@ -46,6 +46,9 @@ TagManager:
     locked: 0
   - name: ForeGround
     uniqueID: 1742939633
+    locked: 0
+  - name: enamy
+    uniqueID: 2478039891
     locked: 0
   - name: Player
     uniqueID: 364746601
