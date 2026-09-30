@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -29,14 +30,14 @@ public class Player : MonoBehaviour
     float lastGroundTime;
     float jumpBufferTimer;
     float gravityScaleAtStart;
-   
+   bool isAlive = true;
 
     [SerializeField] private InputActionAsset inputActions;
 
     [SerializeField] private LayerMask groundlayer;
-
+    [SerializeField] private Vector2 deathSeq = new Vector2(25f,25f);
     LayerMask climbingLayer;
-
+    
     InputAction moveAction;
     InputAction jumpAction;
     public bool JumpPressedThisFrame => jumpAction != null && jumpAction.WasPressedThisFrame();
@@ -88,6 +89,11 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        if(!isAlive)
+        {
+            return;
+        }
         flipsprite();
 
         MoveInput = moveAction.ReadValue<Vector2>();
@@ -97,6 +103,8 @@ public class Player : MonoBehaviour
         Jump();
         Climb();
         BetterGravity();
+        Die();
+
     }
 
     private void Run()
@@ -242,8 +250,21 @@ public class Player : MonoBehaviour
        // playerAnimator.SetBool("climb", vSpeed);
 
         playerCharacter.gravityScale = 0.0f;
-    }
 
+
+       
+
+    }
+    private void Die()
+    {
+        if (playerBodyCollider.IsTouchingLayers(LayerMask.GetMask("enamy","Hazards")) )
+        {
+            isAlive = false;
+            //playerAnimator.SetTrigger("die"); // dont have aimations
+            playerCharacter.linearVelocity = deathSeq;
+            
+        }
+    }
 
 
 
